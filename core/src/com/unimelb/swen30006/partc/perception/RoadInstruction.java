@@ -24,19 +24,19 @@ public class RoadInstruction extends Instruction {
 			super.goStraight(delta);
 		}else{//Red and yellow
 			if(currentDirection == carDirections.North){
-				if ((car.getPosition().y + car.getLength() / 2) < nextTrafficlight.y || car.getPosition().y > nextTrafficlight.y){
+				if ((car.getPosition().y + car.getLength() / 2) < nextTrafficlight.y - currentRoad.getWidth()|| car.getPosition().y > nextTrafficlight.y){
 					super.goStraight(delta);
 				}
 			}else if(currentDirection == carDirections.South){
-				if ((car.getPosition().y + car.getLength() / 2) > nextTrafficlight.y || car.getPosition().y < nextTrafficlight.y){
+				if ((car.getPosition().y + car.getLength() / 2) > nextTrafficlight.y + currentRoad.getWidth()|| car.getPosition().y < nextTrafficlight.y){
 					super.goStraight(delta);
 				}
 			}else if(currentDirection == carDirections.East){
-				if ((car.getPosition().x + car.getLength() / 2) < nextTrafficlight.x || car.getPosition().x > nextTrafficlight.x){
+				if ((car.getPosition().x + car.getLength() / 2) < nextTrafficlight.x - currentRoad.getWidth() || car.getPosition().x > nextTrafficlight.x){
 					super.goStraight(delta);
 				}
 			}else if(currentDirection == carDirections.West){
-				if ((car.getPosition().x + car.getLength() / 2) > nextTrafficlight.x || car.getPosition().x < nextTrafficlight.x){
+				if ((car.getPosition().x + car.getLength() / 2) > nextTrafficlight.x + currentRoad.getWidth()|| car.getPosition().x < nextTrafficlight.x){
 					super.goStraight(delta);
 				}
 			}

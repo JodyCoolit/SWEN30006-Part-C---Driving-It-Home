@@ -7,6 +7,7 @@ import java.util.ArrayList;
 
 import com.unimelb.swen30006.partc.ai.interfaces.IPlanning;
 import com.unimelb.swen30006.partc.ai.interfaces.PerceptionResponse;
+import com.unimelb.swen30006.partc.ai.interfaces.PerceptionResponse.Classification;
 import com.unimelb.swen30006.partc.core.objects.Car;
 import com.unimelb.swen30006.partc.roads.Road;
 
@@ -19,6 +20,8 @@ public class Planning implements IPlanning {
 	protected enum trafficlightColor {Red,Green,Yellow}
 	private trafficlightColor tColor;
 	private Instruction instruction = null;
+	private SimpleRoutingAlgorithm algorithm = new SimpleRoutingAlgorithm();
+	private Point2D.Double destination =new Point2D.Double(400,200);
 	
 	public Planning(Car car, Road[] roads){
 		this.car = car;
@@ -28,6 +31,7 @@ public class Planning implements IPlanning {
 	@Override
 	public boolean planRoute(Double destination) {
 		// TODO Auto-generated method stub
+		this.destination = destination;
 		return false;
 	}
 
@@ -38,13 +42,14 @@ public class Planning implements IPlanning {
 			try{
 				nextTlight(results);
 			}catch(Exception e){
-				System.out.println("No more trafficlight");
+				//System.out.println("No more trafficlight");
 			}
 		}
 		
 		if(inIntersection(results)){//in the intersection
 			if(!(instruction instanceof IntersectionInstruction)){
-				instruction = new IntersectionInstruction(this.car);
+				int insCode = algorithm.runAlgorithm(car, destination);
+				instruction = new IntersectionInstruction(this.car, insCode);
 				System.out.println("intersection");
 			}
 		}else{//on the road
@@ -55,7 +60,7 @@ public class Planning implements IPlanning {
 			try{
 				nextTlight(results);
 			}catch(Exception e){
-				System.out.println("No more trafficlight");
+				//System.out.println("No more trafficlight");
 			}
 		}
 		
@@ -95,21 +100,54 @@ public class Planning implements IPlanning {
 		return visibleRoads.toArray(new Road[visibleRoads.size()]);
 	}
 	
+	int secondHighestIndex(double... nums) {
+		int index1 = -1;
+		int index2 = -1;
+		double high1 = -1;
+		double high2 = -1;
+	    for (int i = 0;i < nums.length;i++) {
+	      if (nums[i] > high1) {
+	        high2 = high1;
+	        index2 = index1;
+	        high1 = nums[i];
+	        index1 = i;
+	      } else if (nums[i] > high2) {
+	        high2 = nums[i];
+	        index2 = i;
+	      }
+	    }
+	    return index2;
+	}
+	
 	public void nextTlight(PerceptionResponse [] results) throws NullPointerException{
 		
-		double distance = Float.MAX_VALUE;
-		PerceptionResponse tempPr = null;
+		double [] distance = new double[4];
+		PerceptionResponse [] lights = new PerceptionResponse[4];
+		int i = 0;
 		for(PerceptionResponse pr : results){
-			if(pr.objectType == pr.objectType.TrafficLight){
+			if(pr.objectType == Classification.TrafficLight){
 				double temp = Point2D.distance(car.getPosition().getX(), car.getPosition().getY(), pr.position.x, pr.position.y);
-				if(temp < distance){
-					distance = temp;
-					nextTrafficlight = pr.position;
-					tempPr = pr;
+				distance[i] = temp;
+				lights[i] = pr;
+				/*
+				if(temp > furthest){
+					sndFurthest = furthest;
+					furthest = temp;
+					
+					//nextTrafficlight = pr.position;
+					furthestPr = pr;
+					System.out.println(pr.position);
 				}
+				*/
+				
+				i++;
 			}
 		}
-
+		
+		int index = secondHighestIndex(distance);
+		PerceptionResponse tempPr = lights[index];
+		nextTrafficlight = tempPr.position;
+		
 		if(tempPr.information.get("state").toString().equals( "ff0000ff")){//red
 			tColor = trafficlightColor.Red;
 		}else if(tempPr.information.get("state").toString().equals("00ff00ff")){//green

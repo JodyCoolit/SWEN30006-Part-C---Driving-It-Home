@@ -45,7 +45,7 @@ public class Car extends WorldObject implements ISteppable {
 		this.velocity = new Vector2(0,0);
 		this.acceleration = acceleration;
 		this.brakingPower = brakingPower;
-		this.rotation = this.turnAngle = 90;
+		this.rotation = this.turnAngle = 0;
 	}
 
 	public void brake() {
