@@ -126,27 +126,36 @@ public class Planning implements IPlanning {
 		int i = 0;
 		for(PerceptionResponse pr : results){
 			if(pr.objectType == Classification.TrafficLight){
-				double temp = Point2D.distance(car.getPosition().getX(), car.getPosition().getY(), pr.position.x, pr.position.y);
-				distance[i] = temp;
-				lights[i] = pr;
-				/*
-				if(temp > furthest){
-					sndFurthest = furthest;
-					furthest = temp;
-					
-					//nextTrafficlight = pr.position;
-					furthestPr = pr;
-					System.out.println(pr.position);
-				}
-				*/
 				
-				i++;
+				double tempDistance = Point2D.distance(car.getPosition().getX(), car.getPosition().getY(), pr.position.x, pr.position.y);
+				
+				if (tempDistance < 50){
+					distance[i] = tempDistance;
+					lights[i] = pr;
+					/*
+					if(temp > furthest){
+						sndFurthest = furthest;
+						furthest = temp;
+						
+						//nextTrafficlight = pr.position;
+						furthestPr = pr;
+						System.out.println(pr.position);
+					}
+					*/
+					
+					i++;
+				}
 			}
 		}
+		
+		// Wait until all 4 traffic lights in an intersection are detected
+		if (i < 4)
+			return;
 		
 		int index = secondHighestIndex(distance);
 		PerceptionResponse tempPr = lights[index];
 		nextTrafficlight = tempPr.position;
+		//System.out.println(nextTrafficlight);
 		
 		if(tempPr.information.get("state").toString().equals( "ff0000ff")){//red
 			tColor = trafficlightColor.Red;
